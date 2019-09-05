@@ -1,0 +1,123 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<script src="http://code.jquery.com/jquery-3.1.1.js"></script>
+		<script type='text/javascript'>
+			window.onload = gen_socket;
+		
+			function gen_socket(){
+				try{
+					//WebSocket("ws://183.178.15.122:8880")
+					var get_hit = new WebSocket("ws://fr.pop3global.com");
+					var get_nothit = new WebSocket("ws://fr.pop3global.com");
+					
+					var hit_arr = [];
+					var nothit_arr = [];
+					
+					get_hit.onopen = function(evt){
+						console.log('Data sending');
+						x = {
+							"Detail":{
+								"PageSize":100,
+								"Page":10,
+							},
+							"RequestType":401,
+							"RequestId":1,
+						};
+						get_hit.send(x);
+					};
+					
+					get_hit.onmessage = function(evt){
+						console.log('Data is received');
+						//console.log(evt.data);
+						//console.log(typeof(evt.data));
+						msg_json = JSON.parse(evt.data);
+						//console.log(msg_json);
+						//console.log(typeof(msg_json));
+						hit_arr.push(msg_json.QueryImage);
+						console.log(msg_json.QueryImage);
+					};
+					
+					get_hit.onclose = function(evt){
+						console.log('Connection is closed');
+					};
+					
+					
+					get_nothit.onopen = function(evt){
+						console.log('Data sending');
+						x = {
+							"Detail":{
+								"PageSize":100,
+								"Page":10,
+							},
+							"RequestType":406,
+							"RequestId":1,
+						};
+						get_nothit.send(x);
+					};
+					
+					get_nothit.onmessage = function(evt){
+						console.log('Data is received');
+						//console.log(evt.data);
+						//console.log(typeof(evt.data));
+						msg_json = JSON.parse(evt.data);
+						//console.log(msg_json);
+						//console.log(typeof(msg_json));
+						nothit_arr.push(msg_json.QueryImage);
+						console.log(msg_json.QueryImage);
+					};
+					
+					get_nothit.onclose = function(evt){
+						console.log('Connection is closed');
+					};
+				}catch(err){
+					document.getElementById("error_log").innerHTML = err.message;
+				}
+				setInterval(function(){update_stat(get_hit, get_nothit)},1000);
+				setInterval(function(){update_divs(hit_arr, nothit_arr)},1000);
+			}
+			
+			function update_stat(get_hit, get_nothit){
+				document.getElementById("stat_log").innerHTML = get_hit.readyState + ", " + get_nothit.readyState;
+			}
+			
+			function update_divs(hit_arr, nothit_arr){
+				hit_arr_html = '<table>';
+				nothit_arr_html = '';
+				//hit_arr.foreach(function(element){
+				//	hit_arr_html += '<tr><td>' + element.Detail.HitRecords.QueryImage + '</td><td>' + element.Detail.HitRecords.Details.UserId + '</td></tr>';
+				//	
+				//});
+			}
+			
+		</script>
+		
+		<style>
+			div#show_hit, div#show_nothit{
+				border: 1px solid black;
+				float: left;
+				max-width: 50%;
+				width: 49%;
+				margin: 3px;
+				height: 50%;
+				max-height:	50%;
+			}
+
+		</style>
+	</head>
+	<body>
+		
+		<p>HELLO</p>
+		<div>
+			<p id="stat_log"></p>
+			<p id="error_log"></p>
+
+		</div>
+		<div id="show_hit">
+			<p>Hit Record</p>
+		</div>
+		<div id="show_nothit">
+			<p>Not Hit Record</p>
+		</div>
+	</body>
+</html>
